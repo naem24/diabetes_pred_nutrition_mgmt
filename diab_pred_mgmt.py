@@ -1,6 +1,7 @@
 # Import necessary libraries
 import streamlit as st  # Importing the Streamlit library for creating web applications
 from streamlit_option_menu import option_menu
+import numpy as np
 import os
 from constants import openai_key  # Importing the OpenAI API key from a constants file
 from langchain.llms import OpenAI  # Importing the OpenAI language model
