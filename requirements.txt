@@ -1,7 +1,12 @@
 streamlit
 streamlit_option_menu
-langchain
-openai
 numpy
+pandas
 scikit-learn
 matplotlib
+xgboost
+imblearn
+seaborn
+langchain
+openai
+
