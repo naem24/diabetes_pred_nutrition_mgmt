@@ -4,6 +4,10 @@ from streamlit_option_menu import option_menu
 import numpy as np
 import os
 import pickle
+from langchain.llms import OpenAI  # Importing the OpenAI language model
+from langchain import PromptTemplate  # Importing a template for creating prompts
+from langchain.chains import LLMChain  # Importing a chain to link language models
+from langchain.memory import ConversationBufferMemory  # Importing memory for storing conversation history
 
 # Import necessary libraries (duplicate import statement removed for clarity)
 # Comment: The code imports essential libraries for data manipulation, machine learning, and interfacing with OpenAI language models.
@@ -106,7 +110,7 @@ warnings.filterwarnings("ignore")
 
 # set some pre-defined configurations for the page, such as the page title, logo-icon, page loading state (whether the page is loaded automatically or you need to perform some action for loading)
 st.set_page_config(
-    page_title="Multiple Management System",
+    page_title="Diabetes Management System",
     initial_sidebar_state = 'auto',
     layout='wide'
 )
@@ -127,8 +131,8 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 with st.sidebar:
         selected = option_menu('Diabetes Management System',
-                              ['Diabetes Prediction and Nutrition'],
-                              icons=['prescription2'],
+                              ['Diabetes Prediction and Nutrition','Diabetes Help Chatbot'],
+                              icons=['prescription2','robot'],
                               menu_icon='hospital',
                               default_index =0  
                              )
@@ -258,3 +262,33 @@ if(selected == 'Diabetes Prediction and Nutrition'):
             
             st.caption("Nutrition Recommendation")
             st.success(reco_message)                
+
+if(selected == 'Diabetes Help Chatbot'):
+    # Set OpenAI API key from the constants file
+    os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
+
+    # Set the title for the Streamlit web application
+    st.title('Diabetes Help Bot')
+
+    # Get user input for diabetic-related topics
+    input_text = st.text_input("Ask about diabetic-related topics: Ask about diet? Blood Sugar Level? Complications?")
+
+    # Define a template for the initial input prompt
+    first_input_prompt = PromptTemplate(
+        input_variables=['prompt'],
+        template="reply this question {prompt} in the context of a diabetic patient."
+    )
+
+    # Set up memory for storing the conversation history
+    person_memory = ConversationBufferMemory(input_key='prompt', memory_key='chat_history')
+
+    # Create an instance of the OpenAI language model (LLM)
+    llm = OpenAI(temperature=0.8)
+
+    # Create a language model chain with the specified prompt template and memory
+    chain = LLMChain(llm=llm, prompt=first_input_prompt, verbose=True)
+
+    # Check if there is user input
+    if input_text:
+        # Run the language model chain with the user input and display the result
+        st.write(chain.run(input_text))
