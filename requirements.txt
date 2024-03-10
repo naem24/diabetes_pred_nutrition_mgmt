@@ -7,4 +7,5 @@ matplotlib
 xgboost
 imblearn
 seaborn
-
+langchain
+openai
