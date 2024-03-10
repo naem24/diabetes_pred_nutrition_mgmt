@@ -162,7 +162,7 @@ if(selected == 'Diabetes Prediction and Nutrition'):
     st.write("\n")
 
     # Hypertension
-    hypertension = st.selectbox('Hypertension - Select Yest if currently diagnosed with high blood pressure else select No', yes_no_options)
+    hypertension = st.selectbox('Hypertension - Select Yes if currently diagnosed with high blood pressure else select No', yes_no_options)
     hypertension_value = 1 if hypertension == 'Yes' else 0 
 
     # Heart Disease
@@ -179,7 +179,7 @@ if(selected == 'Diabetes Prediction and Nutrition'):
     blood_glucose_level_value = st.slider("Blood Glucose Level - Amount of glucose in the bloodstream at a given time", min_value=80, max_value=300, value=100)
     
     # Smoker / non-smoker
-    smoker = st.selectbox('Smoker - If you are currently as smoker, select Yes else select No', yes_no_options)
+    smoker = st.selectbox('Smoker - If you are currently a smoker, select Yes else select No', yes_no_options)
     smoker_value = 1 if smoker == 'Yes' else 0 
 
     # Past smoker
@@ -229,14 +229,21 @@ if(selected == 'Diabetes Prediction and Nutrition'):
             st.caption("Model Prediction")
 
             if prediction == 1:
-                st.warning("**Diabetes**")
+                st.warning("You may have **Diabetes**")
             else:
                 st.success ("**No Diabetes**")
 
             st.write(corr_message)
 
-            # Calculate your BMR and desired TDEE    
+            # Calculate your BMR and desired TDEE
+
             BMR, desired_TDEE = calculate_desire_TDEE(activity_value,weight_kg_value,gender_value,age_value,height_feet_value)
+
+            # If the person has diabetes, then set the nutrition goal to Standard by default    
+            if prediction == 1:
+                nutrition_goal = "Standard"
+                nutrition_goal_value  = nutrition_goal_options.index(nutrition_goal)
+
             energy,carbs,proteins,fats = desired_nutrition(nutrition_goal_value,desired_TDEE)
 
             desired_TDEE = round(desired_TDEE)
@@ -259,24 +266,29 @@ if(selected == 'Diabetes Prediction and Nutrition'):
                 st.warning (bmi_interpret)
             
             st.write("\n")
-            
+
             st.caption("Nutrition Recommendation")
+            if prediction == 1:
+                st.warning("You may have diabetes hence your nutrition goal has been considered as 'Standard'")    
             st.success(reco_message)                
 
 if(selected == 'Diabetes Help Chatbot'):
-    # Set OpenAI API key from the constants file
+    # To securely use the key:
+    # Locally - created a folder .streamlit and placed a file secrets.toml file with the key in it. THIS FILE 
+    # IS NOT REQUIRED TO BE COMMITTED TO GITHUB
+    # Deploy - Added the same name value pair in the project->app setting->secrets
     os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
 
     # Set the title for the Streamlit web application
     st.title('Diabetes Help Bot')
 
     # Get user input for diabetic-related topics
-    input_text = st.text_input("Ask about diabetic-related topics: Ask about diet? Blood Sugar Level? Complications?")
-
+    input_text = st.text_input("Ask any question related to diabetes: What diet to follow? Lifestyle? Which activities to avoid?")
+    
     # Define a template for the initial input prompt
     first_input_prompt = PromptTemplate(
         input_variables=['prompt'],
-        template="reply this question {prompt} in the context of a diabetic patient."
+        template="reply to this question {prompt} in the context of a diabetic patient."
     )
 
     # Set up memory for storing the conversation history
